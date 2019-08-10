@@ -38,6 +38,9 @@ import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListe
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 
+import com.google.android.gms.common.Scopes;
+import com.google.android.gms.common.api.Scope;
+
 @Kroll.module(name = "Googlesignin", id = "ti.googlesignin")
 public class GooglesigninModule extends KrollModule implements
 		ConnectionCallbacks, OnConnectionFailedListener {
@@ -49,6 +52,7 @@ public class GooglesigninModule extends KrollModule implements
 	private Context ctx;
 	private String packageName;
 	private String serverClientId;
+	private String scope;
 	private KrollFunction onLogin;
 
 	@Kroll.constant
@@ -110,10 +114,19 @@ public class GooglesigninModule extends KrollModule implements
 			return;
 		}
 
+		if (opts.containsKeyAndNotNull("scope")) {
+			scope = opts.getString("scope");
+			Log.d(LCAT, scope + " read");
+		} else {
+			Log.d(LCAT, "no scope found!");
+			return;
+		}
+
 		GoogleSignInOptions gso = new GoogleSignInOptions.Builder(
 				GoogleSignInOptions.DEFAULT_SIGN_IN)
-				.requestIdToken(serverClientId).requestProfile().requestEmail()
+				.requestIdToken(serverClientId).requestProfile().requestEmail().requestScopes(new Scope(scope)).requestServerAuthCode(serverClientId, false)
 				.build();
+				//maybe try a different server client ID
 		Log.d(LCAT, gso.toString());
 		Log.d(LCAT, "gso built, try to build googleApiClient");
 		googleApiClient = new GoogleApiClient.Builder(ctx)
@@ -188,15 +201,14 @@ public class GooglesigninModule extends KrollModule implements
 			Log.d(LCAT, "onResult: " + requestCode);
 			if (requestCode == RC_SIGN_IN) {
                                 Log.d(LCAT, "processing sign-in with resultCode: " + resultCode);
-				GoogleSignInResult result = Auth.GoogleSignInApi
-						.getSignInResultFromIntent(data);
+				GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
 				Status status = result.getStatus();
 				Log.d(LCAT, "Status = " + status);
 				KrollDict kd = new KrollDict();
 				if (result.isSuccess()) {
 					Log.d(LCAT, "Success");
-					GoogleSignInAccount googleSignInAccount = result
-							.getSignInAccount();
+					GoogleSignInAccount googleSignInAccount = result.getSignInAccount();
+
 					Log.d(LCAT, googleSignInAccount.getDisplayName());
 					Log.d(LCAT, "Login Success");
 
@@ -214,7 +226,9 @@ public class GooglesigninModule extends KrollModule implements
 					kd.put("accountString", googleSignInAccount.getAccount()
 							.toString());
 					kd.put("token", googleSignInAccount.getIdToken());
+					kd.put("serverAuthCode", googleSignInAccount.getServerAuthCode());
 					kd.put("idToken", googleSignInAccount.getIdToken());
+					kd.put("helloBadi3", "yes it's manual");
 					kd.put("id", googleSignInAccount.getId());
 					if (hasListeners("onsuccess")) {
 						Log.e(LCAT,
@@ -263,7 +277,7 @@ public class GooglesigninModule extends KrollModule implements
 	 * application can make requests on other methods provided by the client and
 	 * expect that no user intervention is required to call methods that use
 	 * account and scopes provided to the client constructor.
-	 * 
+	 *
 	 * Note that the contents of the connectionHint Bundle are defined by the
 	 * specific services. Please see the documentation of the specific
 	 * implementation of GoogleApiClient you are using for more information.
@@ -309,4 +323,3 @@ public class GooglesigninModule extends KrollModule implements
 	 * jsonString; }
 	 */
 }
-

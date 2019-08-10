@@ -1,8 +1,6 @@
 var Google = require('ti.googlesignin');
 Google.initialize({
-    clientID: "123456789123-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.apps.googleusercontent.com", //  Web application client ID, not androidID !!!!
-    scope : "https://www.googleapis.com/auth/fitness.activity.read" // Make sure it's enabled in the Google dev console
-
+    clientID: "123456789123-aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.apps.googleusercontent.com" //  Web application client ID, not androidID !!!!
 });
 
 var win = Ti.UI.createWindow({

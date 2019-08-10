@@ -23,7 +23,8 @@ Note that you will need to use the Web ClientID from Google instead of a Android
 ```js
 var Google = require('ti.googlesignin');
 Google.initialize({
-    clientID: '<client-id>' //  Web application client ID, not androidID !!!!
+    clientID: '<client-id>', //  Web application client ID, not androidID !!!!
+    scope: "<scope-here>"
 });
 ```
 
